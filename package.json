@@ -1,0 +1,19 @@
+{
+  "name": "@cloudbolt/cb-xui-packager",
+  "version": "0.1.0",
+  "bin": {
+    "xui": "bin/index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ehussmann@cloudbolt.io",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "archiver": "^5.3.1",
+    "minimist": "^1.2.6",
+    "rsync": "^0.6.1",
+    "sha256-file": "^1.0.0"
+  }
+}

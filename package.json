@@ -5,6 +5,7 @@
     "xui": "bin/index.js"
   },
   "scripts": {
+    "co:login": "aws sso login && aws codeartifact login --tool npm --repository cloudbolt-npm --domain cloudbolt --domain-owner 499620025628",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "ehussmann@cloudbolt.io",

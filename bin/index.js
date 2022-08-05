@@ -103,6 +103,7 @@ function createXuiJson() {
 
   const data = {
     "name": args.name,
+    "id": "XUI-12345",
     "label": args?.label || '',
     "description": args?.description || '',
     "enabled": true,

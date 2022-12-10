@@ -6,6 +6,7 @@ const fs = require("fs");
 const archiver = require("archiver");
 const sha256File = require("sha256-file");
 const path = require("path");
+const load = require("load-pkg");
 
 /**
  * @typedef {Object} Config
@@ -20,57 +21,101 @@ const path = require("path");
  * @prop {string} [iconPath]
  */
 
-/**
- * @return {Config}
- */
+const defaultConfig = {
+  vueSrcDir: "dist",
+  xuiSrcDir: "xui/src",
+  outputDir: "xui/dist",
+};
+
+function parseConfigFromPackageJson() {
+  // get arguments from package.json's `xuiConfig` field
+  const args = load.sync().xuiConfig || {};
+  return parseConfig(args);
+}
+
 function parseConfigFromArgs() {
   // get arguments after first two elements in process.argv
   // See minimist docs for more https://www.npmjs.com/package/minimist
   const args = parseArgs(process.argv.slice(2));
+  return parseConfig(args);
+}
 
-  if (!args?.name || args?.name?.length === 0) {
-    console.error("name argument is required");
-    return;
+/**
+ * Create a config object from the arguments passed in.
+ * Only add fields that are relevant from the args object so we can cleanly union multiple configs.
+ * @param {object} config Object with arbitrary attributes as explained in the README
+ * @return {Config}
+ */
+function parseConfig(args) {
+  const config = {};
+
+  // copy over basic fields
+  ["vue_src", "xui_src", "output", "name", "exclude"].forEach((field) => {
+    if (args[field]) config[field] = args[field];
+  });
+
+  // add icon path and filename if icon is specified
+  if (args.icon) {
+    config.iconPath = args.icon;
+    config.iconFilename = path.basename(args.icon);
   }
 
-  const vueSrcDir = args.vue_src || "dist";
-  const xuiSrcDir = args.xui_src || "xui/src";
-  const outputDir = args.output || "xui/dist";
-  const name = args.name;
-  const icon = args?.icon;
-  const excludes = args?.exclude;
-
-  // Metadata is any argument whose key begins with `met-`. Strip that and collect it.
+  // Metadata is any argument whose key begins with `met-`. Strip the prefix and
+  // add it to the config.
   const extraMetadata = Object.entries(args).reduce(
     (metadata, [key, value]) => {
-      if (key.startsWith("met-")) {
-        const newKey = key.replace("met-", "");
+      if (key.startsWith("met_")) {
+        const newKey = key.replace("met_", "");
         metadata[newKey] = value;
       }
       return metadata;
     },
     {}
   );
-
-  const config = {
-    vueSrcDir,
-    xuiSrcDir,
-    outputDir,
-    name,
-    excludes,
-    extraMetadata,
-  };
-
-  if (icon) {
-    config.iconPath = icon;
-    config.iconFilename = path.basename(icon);
+  if (Object.keys(extraMetadata).length) {
+    config.extraMetadata = extraMetadata;
   }
 
   return config;
 }
 
+function combineConfigs(...configs) {
+  return configs.reduce((combined, config) => {
+    return {
+      ...combined,
+      ...config,
+      exclude: [...(combined.exclude || []), ...(config.exclude || [])],
+      extraMetadata: {
+        ...combined.extraMetadata,
+        ...config.extraMetadata,
+      },
+    };
+  }, {});
+}
+
+/**
+ * @param {Config} config
+ * @throws {Error} if any required config is missing
+ */
+function checkConfigRequirements(config) {
+  if (!config.name) {
+    throw new Error("name is required");
+  }
+}
+
 async function main() {
-  const config = parseConfigFromArgs();
+  const configPackage = parseConfigFromPackageJson();
+  const configArgs = parseConfigFromArgs();
+  const config = combineConfigs(defaultConfig, configPackage, configArgs);
+
+  console.log("Creating XUI using the following config: ", config);
+
+  try {
+    checkConfigRequirements(config);
+  } catch (e) {
+    console.error(e);
+    return;
+  }
 
   try {
     await createOutputDir(config.outputDir);

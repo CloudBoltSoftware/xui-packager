@@ -179,17 +179,22 @@ function createXuiJson({
   extraMetadata,
   iconFilename,
 }) {
-  let files = [];
-  files = listDirContents(xuiSrcDir, files);
-  files = files.map((f) => {
+  // get file paths relative to xuiSrcDir
+  let filePaths = [];
+  // listDirContents will mutate filePaths
+  filePaths = listDirContents(xuiSrcDir, filePaths);
+  filePaths = filePaths.map((f) => {
     return f.replace(`${xuiSrcDir}/`, "");
   });
 
   const xuiMetadata = {
     name: name,
+    // id is a placeholder. CB generates a new one during import.
     id: "XUI-12345",
     enabled: true,
-    package_contents: files,
+    // set last_update to today's date in YYYY-MM-DD format
+    last_updated: new Date().toISOString().split("T")[0],
+    package_contents: filePaths,
     ...extraMetadata,
   };
 

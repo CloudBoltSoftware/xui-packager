@@ -29,6 +29,7 @@ const defaultConfig = {
 
 function parseConfigFromPackageJson() {
   // get arguments from package.json's `xuiConfig` field
+  // get version from package.json's version field if not met_version not in xuiConfig.
 
   const package = load.sync() || {};
   const args = package.xuiConfig || {};
@@ -53,14 +54,11 @@ function parseConfig(args) {
   const config = {};
 
   // copy over basic fields
-  ["vue_src", "xui_src", "output", "name"].forEach((field) => {
+  // Note: 'exclude' paths are relative to vueSrcDir but should be relative to the running dir.
+  // We'll fix that later in fixExcludePaths so we can take the right vueSrcDir.
+  ["vue_src", "xui_src", "output", "name", "exclude"].forEach((field) => {
     if (args[field]) config[field] = args[field];
   });
-
-  // Append each exclude file with the `vue_src` directory
-  if (args.exclude) {
-    config.exclude = args.exclude.map((file) => path.join(args.vue_src, file));
-  }
 
   // add icon path and filename if icon is specified
   if (args.icon) {
@@ -102,6 +100,20 @@ function combineConfigs(...configs) {
 }
 
 /**
+ * Make exclude paths (currently relative to vueSrcDir) relative to the running dir.
+ * @param {Config} config
+ * @returns {Config}
+ */
+function fixExcludePaths(config) {
+  return {
+    ...config,
+    exclude:
+      config.exclude?.map((exclude) => path.join(config.vueSrcDir, exclude)) ||
+      [],
+  };
+}
+
+/**
  * @param {Config} config
  * @throws {Error} if any required config is missing
  */
@@ -115,7 +127,6 @@ async function main() {
   const configPackage = parseConfigFromPackageJson();
   const configArgs = parseConfigFromArgs();
   const config = combineConfigs(defaultConfig, configPackage, configArgs);
-
   console.log("Creating XUI using the following config: ", config);
 
   try {
@@ -208,16 +219,12 @@ function copyFiles({ vueSrcDir, xuiSrcDir, exclude }) {
       .source(`${vueSrcDir}/*`)
       .recursive()
       .destination(`${xuiSrcDir}/static`)
-      .delete();
-
-    rsync.exclude(exclude);
-    rsync.execute((error) => {
-      if (!error) {
+      .delete()
+      .exclude(exclude)
+      .execute((error) => {
+        if (error) reject(error);
         resolve();
-      } else {
-        reject(error);
-      }
-    });
+      });
   });
 }
 
@@ -297,7 +304,7 @@ function listDirContents(dir, fileList, recurse = true) {
  * @returns {Promise[string]} resolves to the path of the zip archive
  */
 async function createContentLibraryZip(config) {
-  const { outputDir, name, iconFilename } = config;
+  const { outputDir, name } = config;
   try {
     await zipXuiPackageFiles(config);
     const contentZipPath = await zipContentLibraryPackageFiles(config);

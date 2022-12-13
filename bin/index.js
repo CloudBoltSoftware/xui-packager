@@ -16,7 +16,7 @@ const load = require("load-pkg");
  * @prop {string} xuiSrcDir
  * @prop {string} outputDir
  * @prop {object} extraMetadata
- * @prop {string[]} excludes
+ * @prop {string[]} exclude
  * @prop {string} [iconFilename]
  * @prop {string} [iconPath]
  */
@@ -29,6 +29,7 @@ const defaultConfig = {
 
 function parseConfigFromPackageJson() {
   // get arguments from package.json's `xuiConfig` field
+
   const package = load.sync() || {};
   const args = package.xuiConfig || {};
   if (!args.met_version) args.met_version = package.version;
@@ -196,7 +197,7 @@ async function cleanupZips({ outputDir }) {
  * sync prod-build files into the xui directory
  * @param {Config} config
  */
-function copyFiles({ vueSrcDir, xuiSrcDir, excludes }) {
+function copyFiles({ vueSrcDir, xuiSrcDir, exclude }) {
   return new Promise((resolve, reject) => {
     const rsync = new Rsync()
       .source(`${vueSrcDir}/*`)
@@ -204,7 +205,7 @@ function copyFiles({ vueSrcDir, xuiSrcDir, excludes }) {
       .destination(`${xuiSrcDir}/static`)
       .delete();
 
-    rsync.exclude(excludes);
+    rsync.exclude(exclude);
     rsync.execute((error) => {
       if (!error) {
         resolve();

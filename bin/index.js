@@ -29,7 +29,9 @@ const defaultConfig = {
 
 function parseConfigFromPackageJson() {
   // get arguments from package.json's `xuiConfig` field
-  const args = load.sync().xuiConfig || {};
+  const package = load.sync() || {};
+  const args = package.xuiConfig || {};
+  if (!args.met_version) args.met_version = package.version;
   return parseConfig(args);
 }
 

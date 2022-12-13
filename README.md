@@ -17,7 +17,7 @@ In addition, any other argument that's prepended with `met` gets added to the me
 
 - `--met_description "TEXT"` Content Library Description. Make sure to quote arguments that have spaces in them.
 - `--met_label LABEL` Human-readable version of the name.
-- `--met_version VERSION` XUI version. Should use calver.
+- `--met_version VERSION` XUI version. By default, this is read from the package.json's `version` field.
 - `--met_minimum_version_required VERSION` Minimum CloudBolt version number for the XUI
 - `--met_maximum_version_required VERSION` Maximum CloudBolt version number for the XUI
 - `--met_last_updated YYYY-MM-DD` Defaults to today unless specified

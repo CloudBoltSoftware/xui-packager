@@ -53,9 +53,14 @@ function parseConfig(args) {
   const config = {};
 
   // copy over basic fields
-  ["vue_src", "xui_src", "output", "name", "exclude"].forEach((field) => {
+  ["vue_src", "xui_src", "output", "name"].forEach((field) => {
     if (args[field]) config[field] = args[field];
   });
+
+  // Append each exclude file with the `vue_src` directory
+  if (args.exclude) {
+    config.exclude = args.exclude.map((file) => path.join(args.vue_src, file));
+  }
 
   // add icon path and filename if icon is specified
   if (args.icon) {

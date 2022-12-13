@@ -1,6 +1,6 @@
 {
   "name": "@cloudbolt/cb-xui-packager",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.4",
   "bin": {
     "xui": "bin/index.js"
   },

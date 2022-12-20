@@ -1,11 +1,11 @@
 {
   "name": "@cloudbolt/cb-xui-packager",
-  "version": "1.0.0-beta.6",
+  "version": "0.1.1",
   "bin": {
     "xui": "bin/index.js"
   },
   "scripts": {
-    "co:login": "aws sso login && aws codeartifact login --tool npm --repository cloudbolt-npm --domain cloudbolt --domain-owner 499620025628 --namespace @cloudbolt",
+    "co:login": "aws sso login && aws codeartifact login --tool npm --repository cloudbolt-npm --domain cloudbolt --domain-owner 499620025628",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "ehussmann@cloudbolt.io",
@@ -13,7 +13,6 @@
   "description": "",
   "dependencies": {
     "archiver": "^5.3.1",
-    "load-pkg": "^4.0.0",
     "minimist": "^1.2.6",
     "rsync": "^0.6.1",
     "sha256-file": "^1.0.0"

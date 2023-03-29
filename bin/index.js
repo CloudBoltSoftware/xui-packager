@@ -12,7 +12,6 @@ const load = require("load-pkg");
  * @typedef {Object} Config
  * @prop {string} name
  * @prop {string} id
- * @prop {boolean} enabled
  * @prop {string} source
  * @prop {string} vueSrcDir
  * @prop {string} xuiSrcDir
@@ -27,7 +26,9 @@ const defaultConfig = {
   vueSrcDir: "dist",
   xuiSrcDir: "xui/src",
   outputDir: "xui/dist",
-  enabled: true,
+  extraMetadata: {
+    enabled: true,
+  },
 };
 
 function parseConfigFromPackageJson() {
@@ -58,11 +59,9 @@ function parseConfig(args) {
   // copy over basic fields
   // Note: 'exclude' paths are relative to vueSrcDir but should be relative to the running dir.
   // We'll fix that later in fixExcludePaths so we can take the right vueSrcDir.
-  ["vue_src", "xui_src", "output", "name", "exclude", "id", "enabled"].forEach(
-    (field) => {
-      if (args[field]) config[field] = args[field];
-    }
-  );
+  ["vue_src", "xui_src", "output", "name", "exclude", "id"].forEach((field) => {
+    if (args[field]) config[field] = args[field];
+  });
 
   // add icon path and filename if icon is specified
   if (args.icon) {
@@ -248,6 +247,7 @@ function createXuiJson({
   xuiSrcDir,
   outputDir,
   name,
+  id,
   extraMetadata,
   iconFilename,
 }) {
@@ -261,6 +261,7 @@ function createXuiJson({
 
   const xuiMetadata = {
     name,
+    id,
     // set last_update to today's date in YYYY-MM-DD format
     last_updated: new Date().toISOString().split("T")[0],
     package_contents: filePaths,

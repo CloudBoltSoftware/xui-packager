@@ -11,6 +11,8 @@ const load = require("load-pkg");
 /**
  * @typedef {Object} Config
  * @prop {string} name
+ * @prop {string} id
+ * @prop {boolean} enabled
  * @prop {string} source
  * @prop {string} vueSrcDir
  * @prop {string} xuiSrcDir
@@ -25,12 +27,12 @@ const defaultConfig = {
   vueSrcDir: "dist",
   xuiSrcDir: "xui/src",
   outputDir: "xui/dist",
+  enabled: true,
 };
 
 function parseConfigFromPackageJson() {
   // get arguments from package.json's `xuiConfig` field
   // get version from package.json's version field if not met_version not in xuiConfig.
-
   const package = load.sync() || {};
   const args = package.xuiConfig || {};
   if (!args.met_version) args.met_version = package.version;
@@ -56,9 +58,11 @@ function parseConfig(args) {
   // copy over basic fields
   // Note: 'exclude' paths are relative to vueSrcDir but should be relative to the running dir.
   // We'll fix that later in fixExcludePaths so we can take the right vueSrcDir.
-  ["vue_src", "xui_src", "output", "name", "exclude"].forEach((field) => {
-    if (args[field]) config[field] = args[field];
-  });
+  ["vue_src", "xui_src", "output", "name", "exclude", "id", "enabled"].forEach(
+    (field) => {
+      if (args[field]) config[field] = args[field];
+    }
+  );
 
   // add icon path and filename if icon is specified
   if (args.icon) {
@@ -118,8 +122,16 @@ function fixExcludePaths(config) {
  * @throws {Error} if any required config is missing
  */
 function checkConfigRequirements(config) {
-  if (!config.name) {
-    throw new Error("name is required");
+  const requiredKeys = ["id", "name"];
+  for (key in requiredKeys) {
+    if (!config[key]) throw new Error(`${key} is required`);
+  }
+
+  // Check that id is in the format XUI-xxxxxxxx
+  if (!config.id.match(/^XUI-[0-9a-z]{8}$/i)) {
+    throw new Error(
+      `id must be in the format XUI-xxxxxxxx. Received ${config.id}`
+    );
   }
 }
 
@@ -248,10 +260,7 @@ function createXuiJson({
   });
 
   const xuiMetadata = {
-    name: name,
-    // id is a placeholder. CB generates a new one during import.
-    id: "XUI-12345678",
-    enabled: true,
+    name,
     // set last_update to today's date in YYYY-MM-DD format
     last_updated: new Date().toISOString().split("T")[0],
     package_contents: filePaths,

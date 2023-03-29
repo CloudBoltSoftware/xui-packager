@@ -7,6 +7,7 @@ Pass arguments like normal command line arguments, either `--flag=value` or `--f
 Any argument is valid, but most are ignored. These are the expected ones (all others are ignored):
 
 - `--name NAME` **Required** name for the xui's identifier and unpacked directory
+- `--id ID` **Required** CUI Global id in the form of `XUI-xxxxxxxx` where x is any number or lowercase letter.
 - `--vue_source DIRECTORY` Source files directory for built vue files. Defaults to `dist`
 - `--xui_src DIRECTORY` Source for xui files like `views.py` and others. Defaults to `xui/src`
 - `--output DIRECTORY` Where the xui gets saved. Defaults to `xui/dist`
@@ -31,6 +32,7 @@ As a convenience, you can also supply arguments in a `configXui` field in `packa
   ...
   "configXui": {
     "name": "cui",
+    "id": "XUI-cui12345",
     "exclude": ["index.html", "vite.svg"],
     "icon": "xui/CUI.png",
     "met_description": "Next-Gen Consumer UI.\n\nAn end-user focused interface that brings a modern, responsive, snappy experience to CloudBolt's best-in-class functionality.\n\nCurrently in BETA.",

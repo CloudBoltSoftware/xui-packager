@@ -250,7 +250,7 @@ function createXuiJson({
   const xuiMetadata = {
     name: name,
     // id is a placeholder. CB generates a new one during import.
-    id: "XUI-12345",
+    id: "XUI-12345678",
     enabled: true,
     // set last_update to today's date in YYYY-MM-DD format
     last_updated: new Date().toISOString().split("T")[0],

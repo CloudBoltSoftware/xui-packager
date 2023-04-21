@@ -126,10 +126,10 @@ function checkConfigRequirements(config) {
     if (!config[key]) throw new Error(`${key} is required`);
   }
 
-  // Check that id is in the format XUI-xxxxxxxx
-  if (!config.id.match(/^XUI-[0-9a-z]{8}$/i)) {
+  // Check that id is in the format XXX-xxxxxxxx
+  if (!config.id.match(/^[A-Z]{3}-[0-9a-z]{8}$/i)) {
     throw new Error(
-      `id must be in the format "XUI-xxxxxxxx" where "x" is any number or lowercase letter. Received "${config.id}"`
+      `id must be in the format "XXX-xxxxxxxx" where "XXX" is any 3 uppercase letters (generally XUI or APL) and "x" is any number or lowercase letter. Received "${config.id}"`
     );
   }
 }

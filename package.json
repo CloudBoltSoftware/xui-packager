@@ -6,6 +6,12 @@
     "xui": "bin/index.js"
   },
   "scripts": {
+    "check": "npm run check:format && npm run check:lint && npm run test",
+    "check:format": "prettier --check .",
+    "check:lint": "eslint .",
+    "format": "prettier --write .",
+    "lint": "eslint --fix .",
+    "prepare": "husky install",
     "test": "vitest"
   },
   "files": [
@@ -23,6 +29,10 @@
     "sha256-file": "^1.0.0"
   },
   "devDependencies": {
+    "eslint": "^8.42.0",
+    "eslint-config-prettier": "^8.8.0",
+    "husky": "^8.0.3",
+    "prettier": "^2.8.8",
     "vitest": "^0.32.0"
   }
 }

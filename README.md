@@ -4,11 +4,21 @@ A helper tool called `xui` for the terminal that creates zip directories and met
 
 ## Installation
 
+Use as a global cli tool:
+
 ```bash
 npm install -g @cloudbolt/xui-packager
 ```
 
+Or as a dev dependency to use in npm scripts:
+
+```bash
+npm install --save-dev @cloudbolt/xui-packager
+```
+
 ## Usage
+
+### CLI Interface
 
 Pass arguments like normal command line arguments, either `--flag=value` or `--flag value` like `xui --source=dist --name=${npm_package_config_xuiName} --exclude=index.html --exclude=vite.svg`. They are parsed with [minimist](https://www.npmjs.com/package/minimist)
 
@@ -31,9 +41,11 @@ In addition, any other argument that's prepended with `met` gets added to the me
 - `--met_maximum_version_required VERSION` Maximum CloudBolt version number for the XUI
 - `--met_last_updated YYYY-MM-DD` Defaults to today unless specified
 
-Paths are relative to the directory in which the command is run unless otherwise stated above.
+Paths are relative to the directory in which the command is run (this is the project root if run as an npm script) unless otherwise stated above.
 
-As a convenience, you can also supply arguments in a `configXui` field in `package.json`. Any arguments passed by command-line will take precidence, so these are good for defaults. They are loaded with [load-pkg](https://www.npmjs.com/package/load-pkg). Example:
+### Package.json Interface
+
+As a convenience, you can also supply arguments in a `configXui` field in `package.json` that will be read when used in npm scripts. Any arguments passed by command-line will take precidence, so these are good for defaults. They are loaded with [load-pkg](https://www.npmjs.com/package/load-pkg). Example `package.json` fragment:
 
 ```json
 {
@@ -47,15 +59,20 @@ As a convenience, you can also supply arguments in a `configXui` field in `packa
     "met_label": "CUI Beta",
     "met_maximum_version_required": "",
     "met_minimum_version_required": "2022.4.2"
+  },
+  "scripts": {
+    ...
+    "makeXui": "xui --met_built_on \"$(date)\""
   }
 }
 ```
 
-## How to publish a new version to CodeArtifact
+## Development (for maintainers)
+
+### How to publish a new version
 
 1. Increment the version of the `package.json` for this project and do an install to be sure the `package-lock.json` is up to date as well.
    - The command `npm version patch` does this for you. It creates a git tag too.
-   - `npm version --preid beta patch` will make a beta version.
-   - 'npm version custom-version' is also valid.
-1. Authenticate with `npm run co:login`
-1. Run the command `npm publish` to publish this version to CodeArtifact
+   - `npm version prepatch --preid beta` will make a beta version.
+   - `npm version custom-version` is also valid.
+1. Run the command `npm publish` to publish this version to npm

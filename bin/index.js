@@ -34,9 +34,9 @@ const defaultConfig = {
 function parseConfigFromPackageJson() {
   // get arguments from package.json's `xuiConfig` field
   // get version from package.json's version field if not met_version not in xuiConfig.
-  const package = load.sync() || {}
-  const args = package.xuiConfig || {}
-  if (!args.met_version) args.met_version = package.version
+  const packageJson = load.sync() || {}
+  const args = packageJson.xuiConfig || {}
+  if (!args.met_version) args.met_version = packageJson.version
   return parseConfig(args)
 }
 
@@ -172,7 +172,8 @@ async function main() {
     return
   }
 }
-main()
+// Run main if this file is called directly
+if (require.main === module) main()
 
 /**
  * @param {string} outputDir path to output directory
@@ -382,4 +383,22 @@ function zipContentLibraryPackageFiles({
 
     archive.finalize().then(() => resolve(outputFilePath))
   })
+}
+
+// Export functions for testing
+module.exports = {
+  checkConfigRequirements,
+  cleanupZips,
+  combineConfigs,
+  copyFiles,
+  createContentLibraryZip,
+  createOutputDir,
+  createXuiJson,
+  listDirContents,
+  main,
+  parseConfig,
+  parseConfigFromArgs,
+  parseConfigFromPackageJson,
+  zipContentLibraryPackageFiles,
+  zipXuiPackageFiles
 }

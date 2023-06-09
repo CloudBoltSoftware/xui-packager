@@ -2,6 +2,9 @@
   "name": "@cloudbolt/xui-packager",
   "version": "1.0.5",
   "description": "CloudBolt Javascript package for bundling XUI content",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "bin": {
     "xui": "bin/index.js"
   },
@@ -12,10 +15,11 @@
     "format": "prettier --write .",
     "lint": "eslint --fix .",
     "prepare": "husky install",
-    "test": "vitest"
+    "test": "vitest --silent"
   },
   "files": [
-    "bin"
+    "bin",
+    "!**.test.js"
   ],
   "repository": {
     "type": "git",

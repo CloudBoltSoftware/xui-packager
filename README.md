@@ -1,6 +1,14 @@
-# CB XUI Packager
+# CloudBolt XUI Packager
 
-A helper tool called `xui` for the terminal that creates zip directories and metadata files necessary for turning a production build of a JS app into a XUI package for importing into CMP.
+A helper tool called `xui` for the terminal that creates zip directories and metadata files necessary for turning a production build of a JS app into a XUI package for CMP.
+
+## Installation
+
+```bash
+npm install -g @cloudbolt/xui-packager
+```
+
+## Usage
 
 Pass arguments like normal command line arguments, either `--flag=value` or `--flag value` like `xui --source=dist --name=${npm_package_config_xuiName} --exclude=index.html --exclude=vite.svg`. They are parsed with [minimist](https://www.npmjs.com/package/minimist)
 

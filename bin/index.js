@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-const parseArgs = require("minimist");
-const Rsync = require("rsync");
-const fs = require("fs");
-const archiver = require("archiver");
-const sha256File = require("sha256-file");
-const path = require("path");
-const load = require("load-pkg");
+const parseArgs = require('minimist')
+const Rsync = require('rsync')
+const fs = require('fs')
+const archiver = require('archiver')
+const sha256File = require('sha256-file')
+const path = require('path')
+const load = require('load-pkg')
 
 /**
  * @typedef {Object} Config
@@ -23,28 +23,28 @@ const load = require("load-pkg");
  */
 
 const defaultConfig = {
-  vueSrcDir: "dist",
-  xuiSrcDir: "xui/src",
-  outputDir: "xui/dist",
+  vueSrcDir: 'dist',
+  xuiSrcDir: 'xui/src',
+  outputDir: 'xui/dist',
   extraMetadata: {
-    enabled: true,
-  },
-};
+    enabled: true
+  }
+}
 
 function parseConfigFromPackageJson() {
   // get arguments from package.json's `xuiConfig` field
   // get version from package.json's version field if not met_version not in xuiConfig.
-  const package = load.sync() || {};
-  const args = package.xuiConfig || {};
-  if (!args.met_version) args.met_version = package.version;
-  return parseConfig(args);
+  const package = load.sync() || {}
+  const args = package.xuiConfig || {}
+  if (!args.met_version) args.met_version = package.version
+  return parseConfig(args)
 }
 
 function parseConfigFromArgs() {
   // get arguments after first two elements in process.argv
   // See minimist docs for more https://www.npmjs.com/package/minimist
-  const args = parseArgs(process.argv.slice(2));
-  return parseConfig(args);
+  const args = parseArgs(process.argv.slice(2))
+  return parseConfig(args)
 }
 
 /**
@@ -54,38 +54,40 @@ function parseConfigFromArgs() {
  * @return {Config}
  */
 function parseConfig(args) {
-  const config = {};
+  const config = {}
 
   // copy over basic fields
   // Note: 'exclude' paths are relative to vueSrcDir but should be relative to the running dir.
   // We'll fix that later in fixExcludePaths so we can take the right vueSrcDir.
-  ["vue_src", "xui_src", "output", "name", "exclude", "id"].forEach((field) => {
-    if (args[field]) config[field] = args[field];
-  });
+  ;['vue_src', 'xui_src', 'output', 'name', 'exclude', 'id'].forEach(
+    (field) => {
+      if (args[field]) config[field] = args[field]
+    }
+  )
 
   // add icon path and filename if icon is specified
   if (args.icon) {
-    config.iconPath = args.icon;
-    config.iconFilename = path.basename(args.icon);
+    config.iconPath = args.icon
+    config.iconFilename = path.basename(args.icon)
   }
 
   // Metadata is any argument whose key begins with `met-`. Strip the prefix and
   // add it to the config.
   const extraMetadata = Object.entries(args).reduce(
     (metadata, [key, value]) => {
-      if (key.startsWith("met_")) {
-        const newKey = key.replace("met_", "");
-        metadata[newKey] = value;
+      if (key.startsWith('met_')) {
+        const newKey = key.replace('met_', '')
+        metadata[newKey] = value
       }
-      return metadata;
+      return metadata
     },
     {}
-  );
+  )
   if (Object.keys(extraMetadata).length) {
-    config.extraMetadata = extraMetadata;
+    config.extraMetadata = extraMetadata
   }
 
-  return config;
+  return config
 }
 
 function combineConfigs(...configs) {
@@ -96,24 +98,10 @@ function combineConfigs(...configs) {
       exclude: [...(combined.exclude || []), ...(config.exclude || [])],
       extraMetadata: {
         ...combined.extraMetadata,
-        ...config.extraMetadata,
-      },
-    };
-  }, {});
-}
-
-/**
- * Make exclude paths (currently relative to vueSrcDir) relative to the running dir.
- * @param {Config} config
- * @returns {Config}
- */
-function fixExcludePaths(config) {
-  return {
-    ...config,
-    exclude:
-      config.exclude?.map((exclude) => path.join(config.vueSrcDir, exclude)) ||
-      [],
-  };
+        ...config.extraMetadata
+      }
+    }
+  }, {})
 }
 
 /**
@@ -121,70 +109,70 @@ function fixExcludePaths(config) {
  * @throws {Error} if any required config is missing
  */
 function checkConfigRequirements(config) {
-  const requiredKeys = ["id", "name"];
+  const requiredKeys = ['id', 'name']
   for (const key of requiredKeys) {
-    if (!config[key]) throw new Error(`${key} is required`);
+    if (!config[key]) throw new Error(`${key} is required`)
   }
 
   // Check that id is in the format XXX-xxxxxxxx
   if (!config.id.match(/^[A-Z]{3}-[0-9a-z]{8}$/i)) {
     throw new Error(
       `id must be in the format "XXX-xxxxxxxx" where "XXX" is any 3 uppercase letters (generally XUI or APL) and "x" is any number or lowercase letter. Received "${config.id}"`
-    );
+    )
   }
 }
 
 async function main() {
-  const configPackage = parseConfigFromPackageJson();
-  const configArgs = parseConfigFromArgs();
-  const config = combineConfigs(defaultConfig, configPackage, configArgs);
-  console.log("Creating XUI using the following config: ", config);
+  const configPackage = parseConfigFromPackageJson()
+  const configArgs = parseConfigFromArgs()
+  const config = combineConfigs(defaultConfig, configPackage, configArgs)
+  console.log('Creating XUI using the following config: ', config)
 
   try {
-    checkConfigRequirements(config);
+    checkConfigRequirements(config)
   } catch (e) {
-    console.error(e);
-    return;
+    console.error(e)
+    return
   }
 
   try {
-    await createOutputDir(config.outputDir);
+    await createOutputDir(config.outputDir)
   } catch (e) {
-    console.error("Error creating output directory", e);
-    return;
+    console.error('Error creating output directory', e)
+    return
   }
 
   try {
-    await cleanupZips(config);
+    await cleanupZips(config)
   } catch (e) {
-    console.warn("Unable to cleanup previous zip archives. Continuing.", e);
+    console.warn('Unable to cleanup previous zip archives. Continuing.', e)
   }
 
   try {
-    await copyFiles(config);
-    console.log(`Successfully copied files from ${config.vueSrcDir}.`);
+    await copyFiles(config)
+    console.log(`Successfully copied files from ${config.vueSrcDir}.`)
   } catch (e) {
-    console.error("Error copying files. Exiting.", e);
-    return;
+    console.error('Error copying files. Exiting.', e)
+    return
   }
 
   try {
-    await createXuiJson(config);
-    console.log("Successfully created XUI metadata JSON file.");
+    await createXuiJson(config)
+    console.log('Successfully created XUI metadata JSON file.')
   } catch (e) {
-    console.error("Error creating json metdata file. Exiting.", e);
-    return;
+    console.error('Error creating json metdata file. Exiting.', e)
+    return
   }
 
   try {
-    const zipLocation = await createContentLibraryZip(config);
-    console.log(`Successfully created zip archive at ${zipLocation}.`);
+    const zipLocation = await createContentLibraryZip(config)
+    console.log(`Successfully created zip archive at ${zipLocation}.`)
   } catch (e) {
-    console.error("Error creating zip archive.", e);
-    return;
+    console.error('Error creating zip archive.', e)
+    return
   }
 }
-main();
+main()
 
 /**
  * @param {string} outputDir path to output directory
@@ -194,12 +182,12 @@ function createOutputDir(outputDir) {
   return new Promise((resolve, reject) => {
     fs.mkdir(outputDir, { recursive: true }, (err) => {
       if (err) {
-        reject(err);
+        reject(err)
       } else {
-        resolve();
+        resolve()
       }
-    });
-  });
+    })
+  })
 }
 
 /**
@@ -207,22 +195,23 @@ function createOutputDir(outputDir) {
  * @param {Config} config
  */
 async function cleanupZips({ outputDir }) {
-  const files = listDirContents(outputDir, [], false);
+  const files = listDirContents(outputDir, [], false)
   try {
     for (const f of files) {
-      if (f.endsWith(".zip")) {
-        await fs.unlinkSync(f);
+      if (f.endsWith('.zip')) {
+        await fs.unlinkSync(f)
       }
     }
-    return Promise.resolve();
+    return Promise.resolve()
   } catch (e) {
-    return Promise.reject(e);
+    return Promise.reject(e)
   }
 }
 
 /**
  * sync prod-build files into the xui directory
  * @param {Config} config
+ * @returns {Promise<Rsync>}
  */
 function copyFiles({ vueSrcDir, xuiSrcDir, exclude }) {
   return new Promise((resolve, reject) => {
@@ -233,10 +222,11 @@ function copyFiles({ vueSrcDir, xuiSrcDir, exclude }) {
       .delete()
       .exclude(exclude)
       .execute((error) => {
-        if (error) reject(error);
-        resolve();
-      });
-  });
+        if (error) reject(error)
+        resolve()
+      })
+    resolve(rsync)
+  })
 }
 
 /**
@@ -249,36 +239,36 @@ function createXuiJson({
   name,
   id,
   extraMetadata,
-  iconFilename,
+  iconFilename
 }) {
   // get file paths relative to xuiSrcDir
-  let filePaths = [];
+  let filePaths = []
   // listDirContents will mutate filePaths
-  filePaths = listDirContents(xuiSrcDir, filePaths);
+  filePaths = listDirContents(xuiSrcDir, filePaths)
   filePaths = filePaths.map((f) => {
-    return f.replace(`${xuiSrcDir}/`, "");
-  });
+    return f.replace(`${xuiSrcDir}/`, '')
+  })
 
   const xuiMetadata = {
     name,
     id,
     // set last_update to today's date in YYYY-MM-DD format
-    last_updated: new Date().toISOString().split("T")[0],
+    last_updated: new Date().toISOString().split('T')[0],
     package_contents: filePaths,
-    ...extraMetadata,
-  };
-
-  if (iconFilename) {
-    xuiMetadata.icon = iconFilename;
+    ...extraMetadata
   }
 
-  const metadataString = JSON.stringify(xuiMetadata, null, 2);
+  if (iconFilename) {
+    xuiMetadata.icon = iconFilename
+  }
+
+  const metadataString = JSON.stringify(xuiMetadata, null, 2)
 
   try {
-    fs.writeFileSync(`${outputDir}/${name}.json`, metadataString);
-    return Promise.resolve();
+    fs.writeFileSync(`${outputDir}/${name}.json`, metadataString)
+    return Promise.resolve()
   } catch (e) {
-    return Promise.reject(e);
+    return Promise.reject(e)
   }
 }
 
@@ -290,20 +280,16 @@ function createXuiJson({
  * @returns {string[]} list of files
  */
 function listDirContents(dir, fileList, recurse = true) {
-  try {
-    const dirContents = fs.readdirSync(dir, { withFileTypes: true });
-    dirContents.forEach((f) => {
-      if (f.isDirectory() && recurse) {
-        const subDirContents = listDirContents(`${dir}/${f.name}`, fileList);
-        fileList.concat(subDirContents);
-      } else {
-        fileList.push(`${dir}/${f.name}`);
-      }
-    });
-    return fileList;
-  } catch (err) {
-    throw err;
-  }
+  const dirContents = fs.readdirSync(dir, { withFileTypes: true })
+  dirContents.forEach((f) => {
+    if (f.isDirectory() && recurse) {
+      const subDirContents = listDirContents(`${dir}/${f.name}`, fileList)
+      fileList.concat(subDirContents)
+    } else {
+      fileList.push(`${dir}/${f.name}`)
+    }
+  })
+  return fileList
 }
 
 /**
@@ -314,18 +300,18 @@ function listDirContents(dir, fileList, recurse = true) {
  * @returns {Promise[string]} resolves to the path of the zip archive
  */
 async function createContentLibraryZip(config) {
-  const { outputDir, name } = config;
+  const { outputDir, name } = config
   try {
-    await zipXuiPackageFiles(config);
-    const contentZipPath = await zipContentLibraryPackageFiles(config);
+    await zipXuiPackageFiles(config)
+    const contentZipPath = await zipContentLibraryPackageFiles(config)
 
     // Clean up files we don't need anymore
-    fs.unlinkSync(`${outputDir}/${name}.zip`);
-    fs.unlinkSync(`${outputDir}/${name}.json`);
+    fs.unlinkSync(`${outputDir}/${name}.zip`)
+    fs.unlinkSync(`${outputDir}/${name}.json`)
 
-    return Promise.resolve(contentZipPath);
+    return Promise.resolve(contentZipPath)
   } catch (e) {
-    return Promise.reject(e);
+    return Promise.reject(e)
   }
 }
 
@@ -334,28 +320,27 @@ async function createContentLibraryZip(config) {
  * @param {Config} config
  */
 function zipXuiPackageFiles({ outputDir, xuiSrcDir, name }) {
-  return new Promise(async (resolve, reject) => {
-    const outputFilePath = `${outputDir}/${name}.zip`;
-    const output = fs.createWriteStream(outputFilePath);
-    const archive = archiver("zip");
+  return new Promise((resolve, reject) => {
+    const outputFilePath = `${outputDir}/${name}.zip`
+    const output = fs.createWriteStream(outputFilePath)
+    const archive = archiver('zip')
 
-    archive.on("warning", function (err) {
-      console.log(err);
-      reject(err);
-    });
+    archive.on('warning', function (err) {
+      console.log(err)
+      reject(err)
+    })
 
-    archive.on("error", function (err) {
-      console.log(err);
-      reject(err);
-    });
+    archive.on('error', function (err) {
+      console.log(err)
+      reject(err)
+    })
 
-    archive.pipe(output);
+    archive.pipe(output)
 
-    archive.directory(xuiSrcDir, name);
+    archive.directory(xuiSrcDir, name)
 
-    await archive.finalize();
-    resolve(outputFilePath);
-  });
+    archive.finalize().then(() => resolve(outputFilePath))
+  })
 }
 
 /**
@@ -367,35 +352,34 @@ function zipContentLibraryPackageFiles({
   outputDir,
   name,
   iconPath,
-  iconFilename,
+  iconFilename
 }) {
-  return new Promise(async (resolve, reject) => {
-    const zipFile = `${outputDir}/${name}.zip`;
-    const metaFile = `${outputDir}/${name}.json`;
-    const buildShaShort = sha256File(zipFile).slice(0, 7);
-    const outputFilePath = `${outputDir}/${name}-${buildShaShort}.zip`;
-    const output = fs.createWriteStream(outputFilePath);
-    const archive = archiver("zip");
+  return new Promise((resolve, reject) => {
+    const zipFile = `${outputDir}/${name}.zip`
+    const metaFile = `${outputDir}/${name}.json`
+    const buildShaShort = sha256File(zipFile).slice(0, 7)
+    const outputFilePath = `${outputDir}/${name}-${buildShaShort}.zip`
+    const output = fs.createWriteStream(outputFilePath)
+    const archive = archiver('zip')
 
-    archive.on("warning", function (err) {
-      console.log(err);
-      reject(err);
-    });
+    archive.on('warning', function (err) {
+      console.log(err)
+      reject(err)
+    })
 
-    archive.on("error", function (err) {
-      console.log(err);
-      reject(err);
-    });
+    archive.on('error', function (err) {
+      console.log(err)
+      reject(err)
+    })
 
-    archive.pipe(output);
+    archive.pipe(output)
 
-    archive.file(zipFile, { name: `${name}.zip` });
-    archive.file(metaFile, { name: `${name}.json` });
+    archive.file(zipFile, { name: `${name}.zip` })
+    archive.file(metaFile, { name: `${name}.json` })
     if (iconPath) {
-      archive.file(iconPath, { name: iconFilename });
+      archive.file(iconPath, { name: iconFilename })
     }
 
-    await archive.finalize();
-    resolve(outputFilePath);
-  });
+    archive.finalize().then(() => resolve(outputFilePath))
+  })
 }

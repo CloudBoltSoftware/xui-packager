@@ -75,4 +75,4 @@ As a convenience, you can also supply arguments in a `configXui` field in `packa
    - The command `npm version patch` does this for you. It creates a git tag too.
    - `npm version prepatch --preid beta` will make a beta version.
    - `npm version custom-version` is also valid.
-1. Run the command `npm publish` to publish this version to npm
+1. Run the command `npm publish --access public` to publish this version to npm

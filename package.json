@@ -27,9 +27,9 @@
   },
   "dependencies": {
     "archiver": "^5.3.1",
+    "fs-extra": "^11.1.1",
     "load-pkg": "^4.0.0",
     "minimist": "^1.2.6",
-    "rsync": "^0.6.1",
     "sha256-file": "^1.0.0"
   },
   "devDependencies": {

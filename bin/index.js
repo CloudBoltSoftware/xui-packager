@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
 const parseArgs = require('minimist')
-const Rsync = require('rsync')
-const fs = require('fs')
+const fs = require('fs-extra')
 const archiver = require('archiver')
 const sha256File = require('sha256-file')
 const path = require('path')
@@ -200,7 +199,7 @@ async function cleanupZips({ outputDir }) {
   try {
     for (const f of files) {
       if (f.endsWith('.zip')) {
-        await fs.unlinkSync(f)
+        fs.unlinkSync(f)
       }
     }
     return Promise.resolve()
@@ -212,21 +211,13 @@ async function cleanupZips({ outputDir }) {
 /**
  * sync prod-build files into the xui directory
  * @param {Config} config
- * @returns {Promise<Rsync>}
+ * @returns {Promise}
  */
 function copyFiles({ vueSrcDir, xuiSrcDir, exclude }) {
-  return new Promise((resolve, reject) => {
-    const rsync = new Rsync()
-      .source(`${vueSrcDir}/*`)
-      .recursive()
-      .destination(`${xuiSrcDir}/static`)
-      .delete()
-      .exclude(exclude)
-      .execute((error) => {
-        if (error) reject(error)
-        resolve()
-      })
-    resolve(rsync)
+  return fs.copy(`${vueSrcDir}/`, `${xuiSrcDir}/static`, {
+    filter: (src) =>
+      !src?.toLowerCase().includes('.ds_store') &&
+      !exclude.some((excludedPath) => src.includes(excludedPath))
   })
 }
 

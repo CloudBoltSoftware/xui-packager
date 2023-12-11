@@ -32,7 +32,7 @@ Any argument is valid, but most are ignored. These are the expected ones (all ot
 - `--exclude PATH` Can be added multiple times. Will ignore listed files in vue source directory (paths should be relative to it)
 - `--icon PATH` Icon file to add to the zipped XUI and pointed to in the metadata.
 
-In addition, any other argument that's prepended with `met` gets added to the metadata. Important examples and how the content library or CloudBolt uses them(note the underscores in the keys):
+In addition, any other argument that's prepended with `met` gets added to the metadata. Important examples and how the content library or CloudBolt uses them (note the underscores in the keys):
 
 - `--met_description "TEXT"` Content Library Description. Make sure to quote arguments that have spaces in them.
 - `--met_label LABEL` Human-readable version of the name.
@@ -40,6 +40,7 @@ In addition, any other argument that's prepended with `met` gets added to the me
 - `--met_minimum_version_required VERSION` Minimum CloudBolt version number for the XUI
 - `--met_maximum_version_required VERSION` Maximum CloudBolt version number for the XUI
 - `--met_last_updated YYYY-MM-DD` Defaults to today unless specified
+- `--met_inbound_web_hook_dependencies` Array of inbound webhooks (iwh) files that are included with this XUI
 
 Paths are relative to the directory in which the command is run (this is the project root if run as an npm script) unless otherwise stated above.
 

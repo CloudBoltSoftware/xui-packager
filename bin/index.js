@@ -70,6 +70,12 @@ function parseConfig(args) {
     config.iconFilename = path.basename(args.icon)
   }
 
+  // add iwh file info if inbound web hooks are present
+  if (args.met_inbound_web_hook_dependencies) {
+    config.iwhFiles = args.met_inbound_web_hook_dependencies
+    config.iwhPath = args.xui_src ? args.xui_src : defaultConfig.xuiSrcDir
+  }
+
   // Metadata is any argument whose key begins with `met-`. Strip the prefix and
   // add it to the config.
   const extraMetadata = Object.entries(args).reduce(
@@ -344,7 +350,9 @@ function zipContentLibraryPackageFiles({
   outputDir,
   name,
   iconPath,
-  iconFilename
+  iconFilename,
+  iwhFiles,
+  iwhPath,
 }) {
   return new Promise((resolve, reject) => {
     const zipFile = `${outputDir}/${name}.zip`
@@ -370,6 +378,12 @@ function zipContentLibraryPackageFiles({
     archive.file(metaFile, { name: `${name}.json` })
     if (iconPath) {
       archive.file(iconPath, { name: iconFilename })
+    }
+
+    if (iwhFiles) {
+      iwhFiles.forEach((file) => {
+        archive.file(`${iwhPath}/${file}`, {name: file})
+      })
     }
 
     archive.finalize().then(() => resolve(outputFilePath))

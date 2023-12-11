@@ -40,7 +40,7 @@ In addition, any other argument that's prepended with `met` gets added to the me
 - `--met_minimum_version_required VERSION` Minimum CloudBolt version number for the XUI
 - `--met_maximum_version_required VERSION` Maximum CloudBolt version number for the XUI
 - `--met_last_updated YYYY-MM-DD` Defaults to today unless specified
-- `--met_inbound_web_hook_dependencies` Array of inbound webhooks (iwh) files that are included with this XUI
+- `--met_inbound_web_hook_dependencies` Optional array of inbound web hook .zip files that are included dependencies for the XUI
 
 Paths are relative to the directory in which the command is run (this is the project root if run as an npm script) unless otherwise stated above.
 
@@ -59,7 +59,11 @@ As a convenience, you can also supply arguments in a `configXui` field in `packa
     "met_description": "Next-Gen Consumer UI.\n\nAn end-user focused interface that brings a modern, responsive, snappy experience to CloudBolt's best-in-class functionality.\n\nCurrently in BETA.",
     "met_label": "CUI Beta",
     "met_maximum_version_required": "",
-    "met_minimum_version_required": "2022.4.2"
+    "met_minimum_version_required": "2022.4.2",
+    "met_inbound_web_hook_dependencies": [
+      "inbound_web_hook_upload_file.zip",
+      "inbound_web_hook_download_file.zip"
+    ],
   },
   "scripts": {
     ...

@@ -24,6 +24,7 @@ const load = require('load-pkg')
 const defaultConfig = {
   vueSrcDir: 'dist',
   xuiSrcDir: 'xui/src',
+  additionalFilesDir: 'xui/additional_files',
   outputDir: 'xui/dist',
   extraMetadata: {
     enabled: true
@@ -68,6 +69,11 @@ function parseConfig(args) {
   if (args.icon) {
     config.iconPath = args.icon
     config.iconFilename = path.basename(args.icon)
+  }
+
+  // add extra files from directory if specified, otherwise default to `xui/additional_files`
+  if (args.additional_files_src) {
+    config.additionalFilesDir = args.additional_files_src
   }
 
   // Metadata is any argument whose key begins with `met-`. Strip the prefix and
@@ -344,7 +350,8 @@ function zipContentLibraryPackageFiles({
   outputDir,
   name,
   iconPath,
-  iconFilename
+  iconFilename,
+  additionalFilesDir
 }) {
   return new Promise((resolve, reject) => {
     const zipFile = `${outputDir}/${name}.zip`
@@ -371,6 +378,8 @@ function zipContentLibraryPackageFiles({
     if (iconPath) {
       archive.file(iconPath, { name: iconFilename })
     }
+
+    archive.directory(additionalFilesDir, false)
 
     archive.finalize().then(() => resolve(outputFilePath))
   })

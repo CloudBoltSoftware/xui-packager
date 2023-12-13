@@ -28,11 +28,12 @@ Any argument is valid, but most are ignored. These are the expected ones (all ot
 - `--id ID` **Required** CUI Global id in the form of `XUI-xxxxxxxx` where x is any number or lowercase letter.
 - `--vue_source DIRECTORY` Source files directory for built vue files. Defaults to `dist`
 - `--xui_src DIRECTORY` Source for xui files like `views.py` and others. Defaults to `xui/src`
+- `--additional_files_src DIRECTORY` Source for additional files to be bundled into the final zip. Defaults to `xui/additional_files`
 - `--output DIRECTORY` Where the xui gets saved. Defaults to `xui/dist`
 - `--exclude PATH` Can be added multiple times. Will ignore listed files in vue source directory (paths should be relative to it)
 - `--icon PATH` Icon file to add to the zipped XUI and pointed to in the metadata.
 
-In addition, any other argument that's prepended with `met` gets added to the metadata. Important examples and how the content library or CloudBolt uses them(note the underscores in the keys):
+In addition, any other argument that's prepended with `met` gets added to the metadata. Important examples and how the content library or CloudBolt uses them (note the underscores in the keys):
 
 - `--met_description "TEXT"` Content Library Description. Make sure to quote arguments that have spaces in them.
 - `--met_label LABEL` Human-readable version of the name.
@@ -40,6 +41,7 @@ In addition, any other argument that's prepended with `met` gets added to the me
 - `--met_minimum_version_required VERSION` Minimum CloudBolt version number for the XUI
 - `--met_maximum_version_required VERSION` Maximum CloudBolt version number for the XUI
 - `--met_last_updated YYYY-MM-DD` Defaults to today unless specified
+- `--met_inbound_web_hook_dependencies` Optional array of inbound web hook ZIP files that are dependencies for the XUI. ZIP files should be in `xui/additional_files` or the custom directory argument provided to `--additional_files_src` 
 
 Paths are relative to the directory in which the command is run (this is the project root if run as an npm script) unless otherwise stated above.
 
@@ -58,7 +60,11 @@ As a convenience, you can also supply arguments in a `configXui` field in `packa
     "met_description": "Next-Gen Consumer UI.\n\nAn end-user focused interface that brings a modern, responsive, snappy experience to CloudBolt's best-in-class functionality.\n\nCurrently in BETA.",
     "met_label": "CUI Beta",
     "met_maximum_version_required": "",
-    "met_minimum_version_required": "2022.4.2"
+    "met_minimum_version_required": "2022.4.2",
+    "met_inbound_web_hook_dependencies": [
+      "inbound_web_hook_upload_file.zip",
+      "inbound_web_hook_download_file.zip"
+    ],
   },
   "scripts": {
     ...
